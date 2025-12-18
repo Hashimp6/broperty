@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 // API Configuration
-const API_BASE_URL = 'http://192.168.29.67:8081';
+import API_BASE_URL from '../config';
 
 const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState({

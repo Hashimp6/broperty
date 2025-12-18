@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 // API Configuration
-const API_BASE_URL = 'http://192.168.29.67:8081';
+import API_BASE_URL from '../config';
 
 const RegisterPage = () => {
     const navigate = useNavigate();

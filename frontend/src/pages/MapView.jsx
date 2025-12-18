@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://192.168.29.67:8081';
+import API_BASE_URL from '../config';
 
 // Distance in kilometers to search for nearby properties
 const SEARCH_RADIUS_KM = 10;

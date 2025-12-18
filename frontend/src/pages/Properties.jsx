@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { MapPin, Bed, Bath, Maximize, Search, SlidersHorizontal, X, Home, ChevronRight } from 'lucide-react';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://192.168.29.67:8081';
+import API_BASE_URL from '../config'; 
 
 const Properties = () => {
   const [properties, setProperties] = useState([]);
