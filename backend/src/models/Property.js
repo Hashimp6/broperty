@@ -15,7 +15,7 @@ const propertySchema = new mongoose.Schema({
   propertyType: {
     type: String,
     required: true,
-    enum: ['house', 'apartment', 'condo', 'townhouse', 'land', 'commercial']
+    enum: ['house', 'apartment', 'villa', 'land', 'commercial']
   },
   price: {
     type: Number,
