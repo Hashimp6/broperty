@@ -54,7 +54,7 @@ const HomePage = () => {
           params: {
             lat: userLocation?.coords?.lat,
             lng: userLocation?.coords?.lng,
-            radius: 15, // km
+            radius: 100, // km
             page: 1,
             limit: 10,
           },

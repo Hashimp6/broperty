@@ -46,7 +46,7 @@ const Properties = () => {
           // location + pagination
           lat: userLocation?.coords?.lat,
           lng: userLocation?.coords?.lng,
-          radius: 15,
+          radius: 100,
           page: 1,
           limit: 10,
         },
@@ -327,7 +327,7 @@ const Properties = () => {
                   {properties.map((property) => (
                     <Link
                       key={property._id}
-                      to={`/properties/${property._id}`}
+                      to={`/property-details/${property._id}`}
                       className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-gray-200 group"
                     >
                       {/* Property Image */}
