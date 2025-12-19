@@ -121,7 +121,9 @@ const Navbar = () => {
     setIsLocationOpen(false);
   };
   
-
+  const storedUser = JSON.parse(localStorage.getItem('user'));
+  const userRole = storedUser?.role; // 'agent', 'user', etc.
+  
   const handleUseCurrentLocation = () => {
     getCurrentLocation();
     setInputValue('');
@@ -132,18 +134,28 @@ const Navbar = () => {
   const navLinks = [
     { id: 'home', path: '/', label: 'Home', icon: Home },
     { id: 'properties', path: '/properties', label: 'Properties', icon: Building2 },
-    { id: 'create', path: '/create-property', label: 'List Property', icon: PlusCircle }
+  
+    // Only show for agents
+    ...(userRole === 'agent'
+      ? [{ id: 'create', path: '/create-property', label: 'List Property', icon: PlusCircle }]
+      : [])
   ];
+  
 
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-2 text-2xl font-bold text-blue-600">
-            <Building2 className="h-8 w-8" />
-            <span>EstateHub</span>
-          </a>
+          <a href="/" className="flex items-center gap-2">
+  <img
+    src="/logo.png"
+    alt="EstateHub Logo"
+    className="h-10 w-auto"
+  />
+  
+</a>
+
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">

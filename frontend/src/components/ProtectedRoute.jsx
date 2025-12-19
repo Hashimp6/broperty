@@ -1,14 +1,20 @@
 import { Navigate } from 'react-router-dom';
-import useAuthStore from '../store/authStore';
 
-const ProtectedRoute = ({ children }) => {
-  const { token } = useAuthStore();
+const RoleRoute = ({ children, allowedRoles }) => {
+  const token = localStorage.getItem('authToken');
+  const user = JSON.parse(localStorage.getItem('user'));
 
-  if (!token) {
+  // Not logged in
+  if (!token || !user) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Logged in but role not allowed
+  if (!allowedRoles.includes(user.role)) {
+    return <Navigate to="/" replace />;
   }
 
   return children;
 };
 
-export default ProtectedRoute;
+export default RoleRoute;
