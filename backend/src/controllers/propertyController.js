@@ -5,6 +5,57 @@ import { uploadToCloudinary} from '../config/cloudinary.js';
 // @desc    Get all properties with filters
 // @route   GET /api/properties
 // @access  Public
+// export const getProperties = asyncHandler(async (req, res) => {
+//   const {
+//     propertyType,
+//     listingType,
+//     minPrice,
+//     maxPrice,
+//     bedrooms,
+//     bathrooms,
+//     city,
+//     state,
+//     status,
+//     page = 1,
+//     limit = 10
+//   } = req.query;
+
+//   // Build query
+//   const query = {};
+
+//   if (propertyType) query.propertyType = propertyType;
+//   if (listingType) query.listingType = listingType;
+//   if (status) query.status = status;
+//   if (city) query['address.city'] = new RegExp(city, 'i');
+//   if (state) query['address.state'] = new RegExp(state, 'i');
+//   if (bedrooms) query['features.bedrooms'] = { $gte: Number(bedrooms) };
+//   if (bathrooms) query['features.bathrooms'] = { $gte: Number(bathrooms) };
+  
+//   if (minPrice || maxPrice) {
+//     query.price = {};
+//     if (minPrice) query.price.$gte = Number(minPrice);
+//     if (maxPrice) query.price.$lte = Number(maxPrice);
+//   }
+
+//   // Pagination
+//   const skip = (Number(page) - 1) * Number(limit);
+
+//   const properties = await Property.find(query)
+//     .populate('owner', 'name email phone')
+//     .populate('agent', 'name email phone')
+//     .limit(Number(limit))
+//     .skip(skip)
+//     .sort({ createdAt: -1 });
+
+//   const total = await Property.countDocuments(query);
+
+//   res.json({
+//     properties,
+//     page: Number(page),
+//     pages: Math.ceil(total / Number(limit)),
+//     total
+//   });
+// });
 export const getProperties = asyncHandler(async (req, res) => {
   const {
     propertyType,
@@ -16,44 +67,75 @@ export const getProperties = asyncHandler(async (req, res) => {
     city,
     state,
     status,
+    lat,
+    lng,
+    radius = 10, // km
     page = 1,
-    limit = 10
+    limit = 10,
   } = req.query;
 
-  // Build query
-  const query = {};
+  const filters = {};
 
-  if (propertyType) query.propertyType = propertyType;
-  if (listingType) query.listingType = listingType;
-  if (status) query.status = status;
-  if (city) query['address.city'] = new RegExp(city, 'i');
-  if (state) query['address.state'] = new RegExp(state, 'i');
-  if (bedrooms) query['features.bedrooms'] = { $gte: Number(bedrooms) };
-  if (bathrooms) query['features.bathrooms'] = { $gte: Number(bathrooms) };
-  
+  if (propertyType) filters.propertyType = propertyType;
+  if (listingType) filters.listingType = listingType;
+  if (status) filters.status = status;
+  if (city) filters["address.city"] = new RegExp(city, "i");
+  if (state) filters["address.state"] = new RegExp(state, "i");
+  if (bedrooms) filters["features.bedrooms"] = { $gte: Number(bedrooms) };
+  if (bathrooms) filters["features.bathrooms"] = { $gte: Number(bathrooms) };
+
   if (minPrice || maxPrice) {
-    query.price = {};
-    if (minPrice) query.price.$gte = Number(minPrice);
-    if (maxPrice) query.price.$lte = Number(maxPrice);
+    filters.price = {};
+    if (minPrice) filters.price.$gte = Number(minPrice);
+    if (maxPrice) filters.price.$lte = Number(maxPrice);
   }
 
-  // Pagination
   const skip = (Number(page) - 1) * Number(limit);
 
-  const properties = await Property.find(query)
-    .populate('owner', 'name email phone')
-    .populate('agent', 'name email phone')
-    .limit(Number(limit))
-    .skip(skip)
-    .sort({ createdAt: -1 });
+  let properties = [];
+  let total = 0;
 
-  const total = await Property.countDocuments(query);
+  // 🔥 IF LOCATION PROVIDED → SORT BY NEARBY FIRST
+  if (lat && lng) {
+    const pipeline = [
+      {
+        $geoNear: {
+          near: {
+            type: "Point",
+            coordinates: [Number(lng), Number(lat)],
+          },
+          distanceField: "distance", // meters
+          maxDistance: Number(radius) * 1000,
+          spherical: true,
+          query: filters,
+        },
+      },
+      { $sort: { distance: 1, createdAt: -1 } }, // nearest first
+      { $skip: skip },
+      { $limit: Number(limit) },
+    ];
+
+    properties = await Property.aggregate(pipeline);
+
+    total = await Property.countDocuments(filters);
+  } 
+  // 🔁 NO LOCATION → NORMAL LISTING
+  else {
+    properties = await Property.find(filters)
+      .populate("owner", "name email phone")
+      .populate("agent", "name email phone")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit));
+
+    total = await Property.countDocuments(filters);
+  }
 
   res.json({
     properties,
     page: Number(page),
     pages: Math.ceil(total / Number(limit)),
-    total
+    total,
   });
 });
 

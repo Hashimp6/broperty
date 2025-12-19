@@ -5,6 +5,7 @@ import axios from 'axios';
 
 // API Configuration
 import API_BASE_URL from '../config';
+import { useUser } from '../context/UserContext';
 
 const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState({
@@ -18,7 +19,8 @@ const HomePage = () => {
   const [error, setError] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [isSearchActive, setIsSearchActive] = useState(false);
-
+  const [sortByDistance, setSortByDistance] = useState(false);
+  const { userLocation } = useUser();
   // Filter options
   const filterOptions = [
     { id: 'all', label: 'All Properties', type: null, listingType: null },
@@ -42,17 +44,33 @@ const HomePage = () => {
 
   const fetchProperties = async () => {
     try {
+      
+  
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/api/properties`);
+  
+      const response = await axios.get(
+        `${API_BASE_URL}/api/properties`,
+        {
+          params: {
+            lat: userLocation?.coords?.lat,
+            lng: userLocation?.coords?.lng,
+            radius: 15, // km
+            page: 1,
+            limit: 10,
+          },
+        }
+      );
+  
       setProperties(response.data.properties || []);
-      setError('');
+      setError("");
     } catch (err) {
-      console.error('Error fetching properties:', err);
-      setError('Failed to load properties');
+      console.error("Error fetching properties:", err);
+      setError("Failed to load properties");
     } finally {
       setLoading(false);
     }
   };
+  
 
   const filterProperties = () => {
     let filtered = [...properties];

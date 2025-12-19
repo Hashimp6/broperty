@@ -4,11 +4,12 @@ import { MapPin, Bed, Bath, Maximize, Search, SlidersHorizontal, X, Home, Chevro
 import axios from 'axios';
 
 import API_BASE_URL from '../config'; 
-
+import { useUser } from '../context/UserContext';
 const Properties = () => {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { userLocation } = useUser();
   const [filters, setFilters] = useState({
     city: '',
     propertyType: '',
@@ -26,24 +27,31 @@ const Properties = () => {
 
   const fetchProperties = async () => {
     try {
+      console.log("hdjd",userLocation);
+      
       setLoading(true);
       setError('');
-      
-      // Build query parameters based on filters
-      const params = new URLSearchParams();
-      
-      if (filters.city) params.append('city', filters.city);
-      if (filters.propertyType) params.append('propertyType', filters.propertyType);
-      if (filters.listingType) params.append('listingType', filters.listingType);
-      if (filters.minPrice) params.append('minPrice', filters.minPrice);
-      if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
-      if (filters.bedrooms) params.append('bedrooms', filters.bedrooms);
-      if (filters.bathrooms) params.append('bathrooms', filters.bathrooms);
-
-      const queryString = params.toString();
-      const url = `${API_BASE_URL}/api/properties${queryString ? `?${queryString}` : ''}`;
-      
-      const response = await axios.get(url);
+  
+      const response = await axios.get(`${API_BASE_URL}/api/properties`, {
+        params: {
+          // filters
+          city: filters.city || undefined,
+          propertyType: filters.propertyType || undefined,
+          listingType: filters.listingType || undefined,
+          minPrice: filters.minPrice || undefined,
+          maxPrice: filters.maxPrice || undefined,
+          bedrooms: filters.bedrooms || undefined,
+          bathrooms: filters.bathrooms || undefined,
+  
+          // location + pagination
+          lat: userLocation?.coords?.lat,
+          lng: userLocation?.coords?.lng,
+          radius: 15,
+          page: 1,
+          limit: 10,
+        },
+      });
+  
       setProperties(response.data.properties || []);
     } catch (err) {
       console.error('Error fetching properties:', err);
@@ -52,6 +60,7 @@ const Properties = () => {
       setLoading(false);
     }
   };
+  
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
