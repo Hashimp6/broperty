@@ -69,7 +69,7 @@ export const getProperties = asyncHandler(async (req, res) => {
     status,
     lat,
     lng,
-    radius = 10, // km
+    radius = 100, // km
     page = 1,
     limit = 10,
   } = req.query;
