@@ -29,13 +29,17 @@ const HomePage = () => {
     { id: 'house', label: 'Houses', type: 'house', listingType: null },
     { id: 'apartment', label: 'Apartments', type: 'apartment', listingType: null },
     { id: 'land', label: 'Land/Plots', type: 'land', listingType: null },
+    { id: 'Villa', label: 'Villa', type: 'Villa', listingType: null },
     { id: 'commercial', label: 'Commercial', type: 'commercial', listingType: null },
   ];
 
   // Fetch properties from API
   useEffect(() => {
-    fetchProperties();
-  }, []);
+    if (userLocation?.coords?.lat && userLocation?.coords?.lng) {
+      fetchProperties();
+    }
+  }, [userLocation]);
+  
 
   // Filter properties when activeFilter, properties, or searchQuery change
   useEffect(() => {

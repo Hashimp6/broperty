@@ -2,60 +2,7 @@ import asyncHandler from 'express-async-handler';
 import Property from '../models/Property.js';
 import { uploadToCloudinary} from '../config/cloudinary.js';
 
-// @desc    Get all properties with filters
-// @route   GET /api/properties
-// @access  Public
-// export const getProperties = asyncHandler(async (req, res) => {
-//   const {
-//     propertyType,
-//     listingType,
-//     minPrice,
-//     maxPrice,
-//     bedrooms,
-//     bathrooms,
-//     city,
-//     state,
-//     status,
-//     page = 1,
-//     limit = 10
-//   } = req.query;
 
-//   // Build query
-//   const query = {};
-
-//   if (propertyType) query.propertyType = propertyType;
-//   if (listingType) query.listingType = listingType;
-//   if (status) query.status = status;
-//   if (city) query['address.city'] = new RegExp(city, 'i');
-//   if (state) query['address.state'] = new RegExp(state, 'i');
-//   if (bedrooms) query['features.bedrooms'] = { $gte: Number(bedrooms) };
-//   if (bathrooms) query['features.bathrooms'] = { $gte: Number(bathrooms) };
-  
-//   if (minPrice || maxPrice) {
-//     query.price = {};
-//     if (minPrice) query.price.$gte = Number(minPrice);
-//     if (maxPrice) query.price.$lte = Number(maxPrice);
-//   }
-
-//   // Pagination
-//   const skip = (Number(page) - 1) * Number(limit);
-
-//   const properties = await Property.find(query)
-//     .populate('owner', 'name email phone')
-//     .populate('agent', 'name email phone')
-//     .limit(Number(limit))
-//     .skip(skip)
-//     .sort({ createdAt: -1 });
-
-//   const total = await Property.countDocuments(query);
-
-//   res.json({
-//     properties,
-//     page: Number(page),
-//     pages: Math.ceil(total / Number(limit)),
-//     total
-//   });
-// });
 export const getProperties = asyncHandler(async (req, res) => {
   const {
     propertyType,

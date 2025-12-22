@@ -43,6 +43,9 @@ const propertySchema = new mongoose.Schema({
       trim: true,
       maxlength: 200
     },
+    availability: {
+      type: String,
+    },
     category: {
       type: String,
       enum: ['premium', 'standard', 'luxury', 'affordable'],

@@ -10,6 +10,7 @@ import AuthPage from './pages/Login';
 import PropertyDetailPage from './pages/PropertyDetails';
 import PropertyMapView from './pages/MapView';
 import RoleRoute from './components/ProtectedRoute';
+import ProfilePage from './pages/UserProfile';
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/property-details/:id" element={<PropertyDetailPage />} />
           <Route path="/properties" element={<Properties />} />
+       
           <Route
   path="/create-property"
   element={

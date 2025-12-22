@@ -12,6 +12,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import authRoutes from './routes/authRoutes.js';
 import propertyRoutes from './routes/propertyRoutes.js';
 import showingRoutes from './routes/showingRoutes.js';
+import whatsappRoutes from './routes/whatsappRoutes.js';
 
 // NOW initialize Cloudinary after env is loaded
 import './config/cloudinary.js';
@@ -34,6 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/showings', showingRoutes);
+app.use('/api/whatsapp', whatsappRoutes);
 
 // Error handling middleware
 app.use(errorHandler);

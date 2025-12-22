@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { MapPin, Menu, X, Home, Building2, PlusCircle } from 'lucide-react';
+import { MapPin, Menu, X, Home, Building2, PlusCircle, User } from 'lucide-react';
 import { useUser } from '../context/UserContext';
+import ProfileModal from '../pages/UserProfile';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -10,6 +11,7 @@ const Navbar = () => {
   const { userLocation, setUserLocation } = useUser();
   const [activeTab, setActiveTab] = useState('home');
   const debounceTimer = useRef(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const GOOGLE_MAPS_API_KEY = 'AIzaSyAWdpzsOIeDYSG76s3OncbRHmm5pBwiG24';
   useEffect(() => {
     // Get user's current location on mount
@@ -96,7 +98,7 @@ const Navbar = () => {
 
     debounceTimer.current = setTimeout(() => {
       searchLocations(value);
-    }, 300);
+    }, 200);
   };
 
   const handleSelectSuggestion = (suggestion) => {
@@ -270,6 +272,13 @@ const Navbar = () => {
             >
               Find in Maps
             </a>
+            <button
+    onClick={() => setIsProfileOpen(true)}
+    className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:border-blue-600 transition-colors"
+  >
+    <User className="h-5 w-5 text-blue-600" />
+    <span className="text-sm font-medium text-gray-700">Profile</span>
+  </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -367,6 +376,17 @@ const Navbar = () => {
                 );
               })}
               <div className="border-t pt-4 mt-2 flex flex-col gap-3 px-4">
+              <button
+    onClick={() => {
+      setIsProfileOpen(true);
+      setIsMenuOpen(false);
+    }}
+    className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:border-blue-600 transition-colors"
+  >
+    <User className="h-5 w-5 text-blue-600" />
+    <span className="font-medium text-gray-700">My Profile</span>
+  </button>
+
                 <a
                   href="/map"
                   className="bg-blue-900 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors text-center"
@@ -378,8 +398,14 @@ const Navbar = () => {
           </div>
         )}
       </div>
+      <ProfileModal 
+  isOpen={isProfileOpen} 
+  onClose={() => setIsProfileOpen(false)} 
+/>
     </nav>
+    
   );
+  
 };
 
 export default Navbar;

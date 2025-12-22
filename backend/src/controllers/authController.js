@@ -74,6 +74,7 @@ export const login = asyncHandler(async (req, res) => {
 // @access  Private
 export const getMe = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
+  console.log("usss",user);
   
   res.json({
     _id: user._id,
