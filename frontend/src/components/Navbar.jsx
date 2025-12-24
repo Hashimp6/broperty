@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { MapPin, Menu, X, Home, Building2, PlusCircle, User } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import ProfileModal from '../pages/UserProfile';
 
 const Navbar = () => {
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
@@ -12,9 +14,23 @@ const Navbar = () => {
   const [activeTab, setActiveTab] = useState('home');
   const debounceTimer = useRef(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const GOOGLE_MAPS_API_KEY = 'AIzaSyAWdpzsOIeDYSG76s3OncbRHmm5pBwiG24';
+
+  // Set active tab based on current path
   useEffect(() => {
-    // Get user's current location on mount
+    const path = location.pathname;
+    
+    if (path === '/') {
+      setActiveTab('home');
+    } else if (path === '/properties') {
+      setActiveTab('properties');
+    } else if (path === '/create-property') {
+      setActiveTab('create');
+    } else if (path === '/map') {
+      setActiveTab('map');
+    }
+  }, [location.pathname]);
+
+  useEffect(() => {
     getCurrentLocation();
   }, []);
 
@@ -67,7 +83,6 @@ const Navbar = () => {
       }
     );
   };
-  
 
   const searchLocations = async (query) => {
     if (query.length < 2) {
@@ -91,7 +106,6 @@ const Navbar = () => {
     const value = e.target.value;
     setInputValue(value);
 
-    // Debounce the search
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
     }
@@ -124,7 +138,7 @@ const Navbar = () => {
   };
   
   const storedUser = JSON.parse(localStorage.getItem('user'));
-  const userRole = storedUser?.role; // 'agent', 'user', etc.
+  const userRole = storedUser?.role;
   
   const handleUseCurrentLocation = () => {
     getCurrentLocation();
@@ -136,47 +150,41 @@ const Navbar = () => {
   const navLinks = [
     { id: 'home', path: '/', label: 'Home', icon: Home },
     { id: 'properties', path: '/properties', label: 'Properties', icon: Building2 },
-  
-    // Only show for agents
     ...(userRole === 'agent'
       ? [{ id: 'create', path: '/create-property', label: 'List Property', icon: PlusCircle }]
       : [])
   ];
-  
 
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50">
+    <nav className="bg-white shadow-lg sticky top-0 z-50 border-b border-gray-100">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-2">
-  <img
-    src="/logo.png"
-    alt="EstateHub Logo"
-    className="h-10 w-auto"
-  />
-  
-</a>
-
+          <Link to="/" className="flex items-center gap-2">
+            <img
+              src="/logo.png"
+              alt="EstateHub Logo"
+              className="h-10 w-auto"
+            />
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => {
               const Icon = link.icon;
               return (
-                <a
+                <Link
                   key={link.id}
-                  href={link.path}
-                  onClick={() => setActiveTab(link.id)}
-                  className={`flex items-center gap-2 font-semibold transition-colors ${
+                  to={link.path}
+                  className={`flex items-center gap-2 font-semibold transition-all ${
                     activeTab === link.id
-                      ? 'text-blue-600'
-                      : 'text-gray-600 hover:text-blue-600'
+                      ? 'text-teal-600'
+                      : 'text-gray-600 hover:text-teal-600'
                   }`}
                 >
                   <Icon className="h-5 w-5" />
                   {link.label}
-                </a>
+                </Link>
               );
             })}
           </div>
@@ -187,11 +195,11 @@ const Navbar = () => {
             <div className="relative">
               <button
                 onClick={() => setIsLocationOpen(!isLocationOpen)}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:border-blue-600 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 rounded-xl hover:border-teal-500 transition-all hover:shadow-md"
               >
-                <MapPin className="h-5 w-5 text-blue-600" />
+                <MapPin className="h-5 w-5 text-teal-600" />
                 <span className="text-sm font-medium text-gray-700 max-w-32 truncate">
-                {userLocation.locationName}
+                  {userLocation.locationName}
                 </span>
               </button>
 
@@ -206,19 +214,19 @@ const Navbar = () => {
                       setSuggestions([]);
                     }}
                   ></div>
-                  <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-20">
-                    <h3 className="font-semibold text-gray-800 mb-3">Choose Location</h3>
+                  <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 p-4 z-20">
+                    <h3 className="font-bold text-gray-800 mb-3">Choose Location</h3>
                     
                     <button
                       onClick={handleUseCurrentLocation}
-                      className="w-full flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors mb-3"
+                      className="w-full flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-teal-50 to-teal-100 text-teal-700 rounded-xl hover:from-teal-100 hover:to-teal-200 transition-all mb-3 font-semibold"
                     >
                       <MapPin className="h-4 w-4" />
-                      <span className="font-medium">Use Current Location</span>
+                      <span>Use Current Location</span>
                     </button>
 
                     <div className="border-t pt-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
                         Or search for a location:
                       </label>
                       <input
@@ -226,17 +234,16 @@ const Navbar = () => {
                         value={inputValue}
                         onChange={handleInputChange}
                         placeholder="Enter city name..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                       />
                       
-                      {/* Suggestions Dropdown */}
                       {suggestions.length > 0 && (
-                        <div className="mt-2 border border-gray-200 rounded-lg max-h-60 overflow-y-auto">
+                        <div className="mt-2 border border-gray-200 rounded-xl max-h-60 overflow-y-auto">
                           {suggestions.map((suggestion, index) => (
                             <button
                               key={index}
                               onClick={() => handleSelectSuggestion(suggestion)}
-                              className="w-full text-left px-3 py-2 hover:bg-blue-50 transition-colors border-b last:border-b-0"
+                              className="w-full text-left px-3 py-2 hover:bg-teal-50 transition-colors border-b last:border-b-0"
                             >
                               <div className="font-medium text-sm text-gray-800">
                                 {suggestion.address.city || suggestion.address.town || suggestion.address.village || suggestion.name}
@@ -250,15 +257,11 @@ const Navbar = () => {
                       )}
                       
                       {inputValue.length >= 2 && suggestions.length === 0 && (
-                        <p className="text-xs text-gray-500 mt-2">
-                          No results found
-                        </p>
+                        <p className="text-xs text-gray-500 mt-2">No results found</p>
                       )}
                       
                       {inputValue.length < 2 && inputValue.length > 0 && (
-                        <p className="text-xs text-gray-500 mt-2">
-                          Type at least 2 characters
-                        </p>
+                        <p className="text-xs text-gray-500 mt-2">Type at least 2 characters</p>
                       )}
                     </div>
                   </div>
@@ -266,25 +269,28 @@ const Navbar = () => {
               )}
             </div>
 
-            <a
-              href="/map"
-              className="bg-blue-900 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+            <Link
+              to="/map"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-md hover:shadow-lg"
             >
               Find in Maps
-            </a>
+            </Link>
+            
             <button
-    onClick={() => setIsProfileOpen(true)}
-    className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:border-blue-600 transition-colors"
-  >
-    <User className="h-5 w-5 text-blue-600" />
-    <span className="text-sm font-medium text-gray-700">Profile</span>
-  </button>
+              onClick={() => setIsProfileOpen(true)}
+              className="relative group"
+            >
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white font-bold text-sm hover:shadow-lg transition-all duration-300 hover:scale-110 ring-2 ring-white hover:ring-teal-200">
+                {storedUser?.name?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden text-gray-600 hover:text-blue-600 transition-colors"
+            className="md:hidden text-gray-600 hover:text-teal-600 transition-colors"
           >
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -298,28 +304,28 @@ const Navbar = () => {
               <div className="px-4">
                 <button
                   onClick={() => setIsLocationOpen(!isLocationOpen)}
-                  className="w-full flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:border-blue-600 transition-colors"
+                  className="w-full flex items-center gap-2 px-4 py-2 border-2 border-gray-200 rounded-xl hover:border-teal-500 transition-all"
                 >
-                  <MapPin className="h-5 w-5 text-blue-600" />
+                  <MapPin className="h-5 w-5 text-teal-600" />
                   <span className="text-sm font-medium text-gray-700 truncate">
-                  {userLocation.locationName}
+                    {userLocation.locationName}
                   </span>
                 </button>
 
                 {isLocationOpen && (
-                  <div className="mt-2 bg-gray-50 rounded-lg p-4">
-                    <h3 className="font-semibold text-gray-800 mb-3">Choose Location</h3>
+                  <div className="mt-2 bg-gray-50 rounded-xl p-4">
+                    <h3 className="font-bold text-gray-800 mb-3">Choose Location</h3>
                     
                     <button
                       onClick={handleUseCurrentLocation}
-                      className="w-full flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors mb-3"
+                      className="w-full flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-teal-50 to-teal-100 text-teal-700 rounded-xl hover:from-teal-100 hover:to-teal-200 transition-all mb-3 font-semibold"
                     >
                       <MapPin className="h-4 w-4" />
-                      <span className="font-medium">Use Current Location</span>
+                      <span>Use Current Location</span>
                     </button>
 
                     <div className="border-t pt-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
                         Or search for a location:
                       </label>
                       <input
@@ -327,17 +333,16 @@ const Navbar = () => {
                         value={inputValue}
                         onChange={handleInputChange}
                         placeholder="Enter city name..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
                       />
                       
-                      {/* Mobile Suggestions */}
                       {suggestions.length > 0 && (
-                        <div className="mt-2 border border-gray-200 rounded-lg max-h-48 overflow-y-auto">
+                        <div className="mt-2 border border-gray-200 rounded-xl max-h-48 overflow-y-auto">
                           {suggestions.map((suggestion, index) => (
                             <button
                               key={index}
                               onClick={() => handleSelectSuggestion(suggestion)}
-                              className="w-full text-left px-3 py-2 hover:bg-blue-50 transition-colors border-b last:border-b-0"
+                              className="w-full text-left px-3 py-2 hover:bg-teal-50 transition-colors border-b last:border-b-0"
                             >
                               <div className="font-medium text-sm text-gray-800">
                                 {suggestion.address.city || suggestion.address.town || suggestion.address.village || suggestion.name}
@@ -357,55 +362,52 @@ const Navbar = () => {
               {navLinks.map((link) => {
                 const Icon = link.icon;
                 return (
-                  <a
+                  <Link
                     key={link.id}
-                    href={link.path}
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      setActiveTab(link.id);
-                    }}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors ${
+                    to={link.path}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-colors ${
                       activeTab === link.id
-                        ? 'bg-blue-50 text-blue-600'
+                        ? 'bg-gradient-to-r from-teal-50 to-teal-100 text-teal-700'
                         : 'text-gray-600 hover:bg-gray-50'
                     }`}
                   >
                     <Icon className="h-5 w-5" />
                     {link.label}
-                  </a>
+                  </Link>
                 );
               })}
+              
               <div className="border-t pt-4 mt-2 flex flex-col gap-3 px-4">
-              <button
-    onClick={() => {
-      setIsProfileOpen(true);
-      setIsMenuOpen(false);
-    }}
-    className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:border-blue-600 transition-colors"
-  >
-    <User className="h-5 w-5 text-blue-600" />
-    <span className="font-medium text-gray-700">My Profile</span>
-  </button>
-
-                <a
-                  href="/map"
-                  className="bg-blue-900 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors text-center"
+                <Link
+                  to="/map"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-3 rounded-xl font-bold text-center transition-all shadow-md"
                 >
                   Find in Maps
-                </a>
+                </Link>
+                
+                <button
+                  onClick={() => {
+                    setIsProfileOpen(true);
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 rounded-xl hover:border-teal-500 transition-all"
+                >
+                  <User className="h-5 w-5 text-teal-600" />
+                  <span className="text-sm font-medium text-gray-700">Profile</span>
+                </button>
               </div>
             </div>
           </div>
         )}
       </div>
-      <ProfileModal 
-  isOpen={isProfileOpen} 
-  onClose={() => setIsProfileOpen(false)} 
-/>
+      
+      {isProfileOpen && (
+        <ProfileModal onClose={() => setIsProfileOpen(false)} />
+      )}
     </nav>
-    
   );
-  
 };
 
 export default Navbar;

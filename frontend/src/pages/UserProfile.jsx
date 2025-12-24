@@ -2,8 +2,11 @@
 import API_BASE_URL from '../config';
 import { useState, useEffect } from 'react';
 import { X, User, Mail, Phone, Lock, Save, Camera, Edit2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
 
 const ProfileModal = ({ isOpen, onClose }) => {
+    const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -34,29 +37,46 @@ const ProfileModal = ({ isOpen, onClose }) => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/api/auth/me'
-        `, {
+      const token = localStorage.getItem('authToken');
+      
+      // Debug logs
+      console.log('Token from localStorage:', token);
+      console.log('API URL:', `${API_BASE_URL}/api/auth/me`);
+      
+      if (!token) {
+        throw new Error('No authentication token found. Please login again.');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setProfileData(data);
-        setEditData({
-          name: data.name,
-          email: data.email,
-          phone: data.phone || '',
-          password: '',
-          confirmPassword: ''
-        });
-      } else {
-        setError('Failed to load profile');
+      console.log('Response status:', response.status);
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Session expired. Please login again.');
+        }
+        throw new Error('Failed to load profile');
       }
+
+      const data = await response.json();
+      console.log('Profile data:', data);
+      
+      setProfileData(data);
+      setEditData({
+        name: data.name,
+        email: data.email,
+        phone: data.phone || '',
+        password: '',
+        confirmPassword: ''
+      });
     } catch (err) {
-      setError('Error loading profile');
+      console.error('Profile fetch error:', err);
+      setError(err.message || 'Error loading profile');
     } finally {
       setLoading(false);
     }
@@ -86,7 +106,7 @@ const ProfileModal = ({ isOpen, onClose }) => {
     try {
       setLoading(true);
       setError('');
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken'); // Fixed: Using authToken
       
       const updateData = {
         name: editData.name,
@@ -107,35 +127,43 @@ const ProfileModal = ({ isOpen, onClose }) => {
         body: JSON.stringify(updateData)
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        
-        // Update localStorage with new token if provided
-        if (data.token) {
-          localStorage.setItem('token', data.token);
-        }
-        
-        // Update local state
-        setProfileData({
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
-          role: data.role,
-          avatar: data.avatar
-        });
-        
-        setSuccess('Profile updated successfully!');
-        setIsEditing(false);
-        setEditData(prev => ({ ...prev, password: '', confirmPassword: '' }));
-        
-        // Clear success message after 3 seconds
-        setTimeout(() => setSuccess(''), 3000);
-      } else {
+      if (!response.ok) {
         const errorData = await response.json();
-        setError(errorData.message || 'Failed to update profile');
+        throw new Error(errorData.message || 'Failed to update profile');
       }
+
+      const data = await response.json();
+      
+      // Update localStorage with new token
+      if (data.token) {
+        localStorage.setItem('authToken', data.token);
+      }
+      
+      // Update user data in localStorage
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      localStorage.setItem('user', JSON.stringify({
+        ...userData,
+        name: data.name,
+        email: data.email
+      }));
+      
+      // Update local state
+      setProfileData({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        role: data.role,
+        avatar: data.avatar
+      });
+      
+      setSuccess('Profile updated successfully!');
+      setIsEditing(false);
+      setEditData(prev => ({ ...prev, password: '', confirmPassword: '' }));
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError('Error updating profile');
+      setError(err.message || 'Error updating profile');
     } finally {
       setLoading(false);
     }
@@ -255,9 +283,10 @@ const ProfileModal = ({ isOpen, onClose }) => {
                 <input
                   type="tel"
                   name="phone"
-                  value={isEditing ? editData.phone : profileData.phone || 'Not provided'}
+                  value={isEditing ? editData.phone : (profileData.phone || 'Not provided')}
                   onChange={handleInputChange}
                   disabled={!isEditing}
+                  placeholder={isEditing ? "Enter phone number" : ""}
                   className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     isEditing ? 'bg-white border-gray-300' : 'bg-gray-50 border-gray-200 cursor-not-allowed'
                   }`}
@@ -299,9 +328,18 @@ const ProfileModal = ({ isOpen, onClose }) => {
                   </div>
                 </>
               )}
-
+ 
               {/* Action Buttons */}
               <div className="flex gap-3 pt-4">
+              <button
+  onClick={() => {
+    onClose();            // close modal
+    navigate('/my-listings'); // then navigate
+  }}
+  className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+>
+  My Listings
+</button>
                 {!isEditing ? (
                   <button
                     type="button"

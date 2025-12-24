@@ -108,22 +108,32 @@ function formatPrice(price) {
 
 // Send text message
 const sendTextMessage = async (to, message) => {
-  await axios.post(
-    WHATSAPP_API_URL,
-    {
-      messaging_product: 'whatsapp',
-      to,
-      type: 'text',
-      text: { body: message }
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${WHATSAPP_TOKEN}`,
-        'Content-Type': 'application/json'
-      }
+    try {
+      const response = await axios.post(
+        WHATSAPP_API_URL,
+        {
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual', // Best practice to include
+          to: to,
+          type: 'text',
+          text: { 
+            preview_url: true, // This enables link previews (very useful for real estate!)
+            body: message 
+          }
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('❌ WhatsApp API Error:', error.response?.data || error.message);
+      throw error; // Let the controller handle the final error response
     }
-  );
-};
+  };
 
 // Mark message as read
 const markAsRead = async (messageId) => {

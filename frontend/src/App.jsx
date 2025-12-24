@@ -11,6 +11,7 @@ import PropertyDetailPage from './pages/PropertyDetails';
 import PropertyMapView from './pages/MapView';
 import RoleRoute from './components/ProtectedRoute';
 import ProfilePage from './pages/UserProfile';
+import MyListingsPage from './pages/MyListings';
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/property-details/:id" element={<PropertyDetailPage />} />
           <Route path="/properties" element={<Properties />} />
+          <Route path="/my-listings" element={<MyListingsPage />} />
        
           <Route
   path="/create-property"
