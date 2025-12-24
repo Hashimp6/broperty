@@ -30,6 +30,10 @@ const PropertyDetailPage = () => {
     fetchPropertyDetails();
   }, [id]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const fetchPropertyDetails = async () => {
     try {
       setLoading(true);
@@ -298,14 +302,14 @@ const PropertyDetailPage = () => {
       <div className="bg-white">
         <div className="container mx-auto px-4 py-6">
           {/* Featured Badge */}
-          {property.featured && (
+          {/* {property.featured && (
             <div className="mb-4">
               <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-full font-bold shadow-lg">
                 <Star className="h-5 w-5 fill-current" />
                 Featured Property
               </div>
             </div>
-          )}
+          )} */}
 
           {/* Main Image Grid */}
           {property.images && property.images.length > 0 ? (
